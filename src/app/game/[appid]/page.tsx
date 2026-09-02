@@ -77,24 +77,28 @@ export default function GamePage({ params }: { params: Promise<{ appid: string }
 
       <div className="flex flex-col gap-4">
         {result.components.map((c) => (
-          <div key={c.label} className="flex flex-col gap-2 rounded-xl border border-black/10 p-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-medium">{c.label}</h3>
+          <div key={c.label} className="flex flex-col gap-3 rounded-xl border border-black/10 p-4">
+            <h3 className="font-medium">{c.label}</h3>
+
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <p className="text-black/50">Minimum</p>
+                <p>{c.minValue ?? "—"}</p>
+              </div>
+              <div>
+                <p className="text-black/50">Doporučeno</p>
+                <p>{c.recommendedValue ?? "—"}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between border-t border-black/10 pt-3">
+              <div className="text-sm">
+                <p className="text-black/50">Tvoje</p>
+                <p>{c.yourValue}</p>
+              </div>
               <VerdictBadge verdict={c.verdict} />
             </div>
-            <p className="text-sm">
-              <span className="text-black/50">Ty:</span> {c.yourValue}
-            </p>
-            {c.minValue && (
-              <p className="text-sm">
-                <span className="text-black/50">Minimum:</span> {c.minValue}
-              </p>
-            )}
-            {c.recommendedValue && (
-              <p className="text-sm">
-                <span className="text-black/50">Doporučeno:</span> {c.recommendedValue}
-              </p>
-            )}
+
             {c.note && <p className="text-xs text-black/40">{c.note}</p>}
           </div>
         ))}

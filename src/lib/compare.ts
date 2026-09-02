@@ -25,6 +25,12 @@ function compareNumeric(label: string, your: number, min?: number, rec?: number)
   };
 }
 
+// Very old games sometimes only say e.g. "DirectX 9.0-compliant video card with Shader
+// Model 3.0" instead of naming a GPU model, and point to an external "supported list" that
+// isn't part of Steam's structured data (just a link on the developer's own site) — we can't
+// fetch that. But that bar is so low that essentially any named GPU clears it.
+const GENERIC_LOW_BAR_GPU = /shader model|directx\s*9|directx\s*10\b/i;
+
 function compareScored(
   label: string,
   yourName: string,
@@ -42,7 +48,13 @@ function compareScored(
   if (yourScore === null) {
     note = "Nepodařilo se rozpoznat model — porovnej ručně podle textu.";
   } else if (minScore === null) {
-    note = "Hra neuvádí rozpoznatelný model — porovnej ručně podle textu.";
+    if (minName && GENERIC_LOW_BAR_GPU.test(minName)) {
+      verdict = "ok";
+      note =
+        "Hra jen vyžaduje starou obecnou podporu DirectX/Shader Model (bez konkrétního modelu) — tvoje grafika ji bez problémů splňuje. Ten \"supported list\" v požadavcích je jen odkaz na stránku výrobce hry, Steam ho v datech nemá.";
+    } else {
+      note = "Hra neuvádí rozpoznatelný model — porovnej ručně podle textu.";
+    }
   } else {
     const meetsMin = yourScore >= minScore;
     const meetsRec = recScore !== null ? yourScore >= recScore : meetsMin;

@@ -155,3 +155,5 @@ export const GPU_OPTIONS = [
 ];
 
 export const RAM_OPTIONS_GB = [4, 6, 8, 12, 16, 24, 32, 48, 64, 128];
+
+export const OS_OPTIONS = ["Windows 10", "Windows 11", "macOS", "Linux (SteamOS/Proton)"];

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { PcSpecs } from "@/lib/types";
 import { saveSpecs } from "@/lib/specsStorage";
-import { CPU_OPTIONS, GPU_OPTIONS, RAM_OPTIONS_GB } from "@/lib/hardwareOptions";
+import { CPU_OPTIONS, GPU_OPTIONS, RAM_OPTIONS_GB, OS_OPTIONS } from "@/lib/hardwareOptions";
 
 const EMPTY: PcSpecs = { cpu: "", gpu: "", ramGB: 8, storageFreeGB: 50, os: "Windows 11" };
 
@@ -85,6 +85,7 @@ export default function SpecsForm({
             min={0}
             value={specs.storageFreeGB}
             onChange={(e) => setSpecs({ ...specs, storageFreeGB: Number(e.target.value) })}
+            onFocus={(e) => e.target.select()}
             className="rounded-lg border border-black/15 px-3 py-2"
           />
         </label>
@@ -92,11 +93,17 @@ export default function SpecsForm({
 
       <label className="flex flex-col gap-1 text-sm">
         Operační systém
-        <input
+        <select
           value={specs.os}
           onChange={(e) => setSpecs({ ...specs, os: e.target.value })}
           className="rounded-lg border border-black/15 px-3 py-2"
-        />
+        >
+          {OS_OPTIONS.map((os) => (
+            <option key={os} value={os}>
+              {os}
+            </option>
+          ))}
+        </select>
       </label>
 
       <button
