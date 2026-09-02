@@ -1,4 +1,4 @@
-import { scoreCpu, scoreGpu } from "./hardwareRank";
+import { scoreCpu, scoreGpu, estimateCpuBaselineGhz } from "./hardwareRank";
 import type { ComparisonResult, ComponentComparison, GameRequirements, PcSpecs, Verdict } from "./types";
 
 function combine(min: Verdict, rec: Verdict): Verdict {
@@ -31,12 +31,23 @@ function compareNumeric(label: string, your: number, min?: number, rec?: number)
 // fetch that. But that bar is so low that essentially any named GPU clears it.
 const GENERIC_LOW_BAR_GPU = /shader model|directx\s*9|directx\s*10\b/i;
 
+// "2.4 GHz or equivalent" style requirements, with no model name to score.
+function meetsClockSpeedRequirement(yourName: string, requirementText: string): boolean | null {
+  const match = requirementText.match(/(\d+(?:[.,]\d+)?)\s*-?\s*ghz/i);
+  if (!match) return null;
+  const requiredGhz = parseFloat(match[1].replace(",", "."));
+  const baseline = estimateCpuBaselineGhz(yourName);
+  if (baseline === null) return null;
+  return baseline >= requiredGhz - 0.15; // small tolerance, this is a rough guess either way
+}
+
 function compareScored(
   label: string,
   yourName: string,
   minName: string | undefined,
   recName: string | undefined,
-  scoreFn: (name: string) => number | null
+  scoreFn: (name: string) => number | null,
+  estimateByClockSpeed = false
 ): ComponentComparison {
   const yourScore = scoreFn(yourName);
   const minScore = minName ? scoreFn(minName) : null;
@@ -48,10 +59,24 @@ function compareScored(
   if (yourScore === null) {
     note = "Nepodařilo se rozpoznat model — porovnej ručně podle textu.";
   } else if (minScore === null) {
+    const meetsMin = minName && estimateByClockSpeed ? meetsClockSpeedRequirement(yourName, minName) : null;
+
     if (minName && GENERIC_LOW_BAR_GPU.test(minName)) {
       verdict = "ok";
       note =
         "Hra jen vyžaduje starou obecnou podporu DirectX/Shader Model (bez konkrétního modelu) — tvoje grafika ji bez problémů splňuje. Ten \"supported list\" v požadavcích je jen odkaz na stránku výrobce hry, Steam ho v datech nemá.";
+    } else if (meetsMin !== null) {
+      let meetsRec = meetsMin;
+      if (recName) {
+        if (recScore !== null) meetsRec = yourScore >= recScore;
+        else {
+          const recResult = meetsClockSpeedRequirement(yourName, recName);
+          if (recResult !== null) meetsRec = recResult;
+        }
+      }
+      verdict = meetsMin ? (meetsRec ? "ok" : "borderline") : "fail";
+      note =
+        "Hra uvádí jen hodinovou frekvenci, ne konkrétní model — tohle je odhad podle typického taktu tvého procesoru, ne jistota.";
     } else {
       note = "Hra neuvádí rozpoznatelný model — porovnej ručně podle textu.";
     }
@@ -75,7 +100,7 @@ export function compareSpecs(specs: PcSpecs, game: GameRequirements): Comparison
   const components: ComponentComparison[] = [];
 
   components.push(
-    compareScored("Procesor (CPU)", specs.cpu, game.minimum?.cpu, game.recommended?.cpu, scoreCpu)
+    compareScored("Procesor (CPU)", specs.cpu, game.minimum?.cpu, game.recommended?.cpu, scoreCpu, true)
   );
   components.push(
     compareScored("Grafika (GPU)", specs.gpu, game.minimum?.gpu, game.recommended?.gpu, scoreGpu)

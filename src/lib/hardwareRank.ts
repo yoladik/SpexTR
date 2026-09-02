@@ -37,6 +37,29 @@ export function scoreCpu(name: string): number | null {
   return null;
 }
 
+// Some (usually older) games only state a bare clock speed ("2.4 GHz or equivalent") instead of
+// naming a CPU model. We can't score that against scoreCpu, but we can guess whether a
+// recognized CPU family typically clocks at or above that speed. This is a rough estimate on
+// purpose — different eras/architectures at the "same" GHz perform very differently — it's only
+// meant to turn "cannot determine" into "probably yes/no" for these generic requirements.
+const CPU_FAMILY_BASELINE_GHZ: Array<{ pattern: RegExp; ghz: number }> = [
+  { pattern: /RYZEN\s?[3579]/, ghz: 3.4 },
+  { pattern: /I[3579][\s-]?\d{3,5}/, ghz: 3.2 },
+  { pattern: /\bFX[\s-]?\d{4}/, ghz: 3.6 },
+  { pattern: /ATHLON/, ghz: 3.0 },
+  { pattern: /CORE\s?2\s?DUO/, ghz: 2.6 },
+  { pattern: /CELERON|PENTIUM/, ghz: 2.8 },
+  { pattern: /M[1234]\s?(PRO|MAX|ULTRA)?/, ghz: 3.5 },
+];
+
+export function estimateCpuBaselineGhz(name: string): number | null {
+  const s = name.toUpperCase();
+  for (const { pattern, ghz } of CPU_FAMILY_BASELINE_GHZ) {
+    if (pattern.test(s)) return ghz;
+  }
+  return null;
+}
+
 export function scoreGpu(name: string): number | null {
   const s = name.toUpperCase();
 
