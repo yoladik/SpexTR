@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { PcSpecs } from "@/lib/types";
 import { loadSpecs } from "@/lib/specsStorage";
 import SpecsForm from "@/components/SpecsForm";
 import GameSearch from "@/components/GameSearch";
+import HistoryList from "@/components/HistoryList";
 
 export default function Home() {
   const [specs, setSpecs] = useState<PcSpecs | null>(null);
@@ -50,7 +52,22 @@ export default function Home() {
         </div>
       )}
 
-      {specs && !editing && <GameSearch />}
+      {specs && !editing && (
+        <>
+          <GameSearch />
+
+          <div className="flex gap-4 text-sm">
+            <Link href="/compare" className="underline">
+              Porovnat víc her
+            </Link>
+            <Link href="/library" className="underline">
+              Import ze Steamu (wishlist/knihovna)
+            </Link>
+          </div>
+
+          <HistoryList />
+        </>
+      )}
     </main>
   );
 }

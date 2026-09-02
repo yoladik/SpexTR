@@ -9,7 +9,13 @@ interface SearchResult {
   icon?: string;
 }
 
-export default function GameSearch() {
+export default function GameSearch({
+  onSelect,
+  placeholder = "např. cyberpunk, call of...",
+}: {
+  onSelect?: (game: SearchResult) => void;
+  placeholder?: string;
+}) {
   const [term, setTerm] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -44,7 +50,7 @@ export default function GameSearch() {
       <input
         value={term}
         onChange={(e) => setTerm(e.target.value)}
-        placeholder="např. cyberpunk, call of..."
+        placeholder={placeholder}
         className="rounded-lg border border-black/15 px-3 py-2"
       />
       {loading && <p className="text-sm text-black/50">Hledám...</p>}
@@ -53,7 +59,7 @@ export default function GameSearch() {
           {results.map((r) => (
             <li key={r.appid}>
               <button
-                onClick={() => router.push(`/game/${r.appid}`)}
+                onClick={() => (onSelect ? onSelect(r) : router.push(`/game/${r.appid}`))}
                 className="flex w-full items-center gap-3 py-2 text-left hover:bg-black/5"
               >
                 {r.icon && (
