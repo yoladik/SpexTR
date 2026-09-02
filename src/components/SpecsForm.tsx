@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { PcSpecs } from "@/lib/types";
 import { saveSpecs } from "@/lib/specsStorage";
+import { CPU_OPTIONS, GPU_OPTIONS, RAM_OPTIONS_GB } from "@/lib/hardwareOptions";
 
 const EMPTY: PcSpecs = { cpu: "", gpu: "", ramGB: 8, storageFreeGB: 50, os: "Windows 11" };
 
@@ -29,35 +30,51 @@ export default function SpecsForm({
         Procesor (CPU)
         <input
           required
+          list="cpu-options"
           value={specs.cpu}
           onChange={(e) => setSpecs({ ...specs, cpu: e.target.value })}
-          placeholder="např. Intel Core i5-10400"
+          placeholder="začni psát nebo vyber ze seznamu, např. Intel Core i5-10400"
           className="rounded-lg border border-black/15 px-3 py-2"
         />
+        <datalist id="cpu-options">
+          {CPU_OPTIONS.map((cpu) => (
+            <option key={cpu} value={cpu} />
+          ))}
+        </datalist>
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
         Grafika (GPU)
         <input
           required
+          list="gpu-options"
           value={specs.gpu}
           onChange={(e) => setSpecs({ ...specs, gpu: e.target.value })}
-          placeholder="např. NVIDIA RTX 3060"
+          placeholder="začni psát nebo vyber ze seznamu, např. NVIDIA RTX 3060"
           className="rounded-lg border border-black/15 px-3 py-2"
         />
+        <datalist id="gpu-options">
+          {GPU_OPTIONS.map((gpu) => (
+            <option key={gpu} value={gpu} />
+          ))}
+        </datalist>
       </label>
 
       <div className="grid grid-cols-2 gap-4">
         <label className="flex flex-col gap-1 text-sm">
           RAM (GB)
-          <input
+          <select
             required
-            type="number"
-            min={1}
             value={specs.ramGB}
             onChange={(e) => setSpecs({ ...specs, ramGB: Number(e.target.value) })}
             className="rounded-lg border border-black/15 px-3 py-2"
-          />
+          >
+            {RAM_OPTIONS_GB.map((gb) => (
+              <option key={gb} value={gb}>
+                {gb} GB
+              </option>
+            ))}
+          </select>
         </label>
 
         <label className="flex flex-col gap-1 text-sm">
