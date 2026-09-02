@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import { searchLocalGames } from "@/lib/localGames";
 
 interface SteamSearchItem {
   id: number;
   name: string;
   tiny_image?: string;
+}
+
+interface SearchResult {
+  appid: string;
+  name: string;
+  icon?: string;
 }
 
 export async function GET(req: NextRequest) {
@@ -12,24 +19,34 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ results: [] });
   }
 
-  const url = `https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(term)}&cc=us&l=english`;
-  const res = await fetch(url, { headers: { "Accept-Language": "en-US" } });
-
-  if (!res.ok) {
-    return NextResponse.json({ error: "Steam search failed" }, { status: 502 });
-  }
-
-  const data = (await res.json()) as { total: number; items: SteamSearchItem[] };
-
-  const sorted = [...data.items].sort((a, b) => matchScore(a.name, term) - matchScore(b.name, term));
-
-  const results = sorted.map((item) => ({
-    appid: item.id,
-    name: item.name,
-    icon: item.tiny_image,
+  const steamResults = await searchSteam(term);
+  const localResults: SearchResult[] = searchLocalGames(term).map((g) => ({
+    appid: `local-${g.id}`,
+    name: g.name,
   }));
 
-  return NextResponse.json({ results });
+  const combined = [...steamResults, ...localResults].sort(
+    (a, b) => matchScore(a.name, term) - matchScore(b.name, term)
+  );
+
+  return NextResponse.json({ results: combined });
+}
+
+async function searchSteam(term: string): Promise<SearchResult[]> {
+  try {
+    const url = `https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(term)}&cc=us&l=english`;
+    const res = await fetch(url, { headers: { "Accept-Language": "en-US" } });
+    if (!res.ok) return [];
+
+    const data = (await res.json()) as { total: number; items: SteamSearchItem[] };
+    return data.items.map((item) => ({
+      appid: String(item.id),
+      name: item.name,
+      icon: item.tiny_image,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 /** Lower = better match. Exact name first, then "starts with", then "contains" (closer to the

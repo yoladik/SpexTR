@@ -16,7 +16,7 @@ export interface ParsedRequirements {
 }
 
 export interface GameRequirements {
-  appid: number;
+  appid: string;
   name: string;
   headerImage?: string;
   minimum?: ParsedRequirements;

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseSteamRequirements } from "@/lib/parseRequirements";
+import { findLocalGame } from "@/lib/localGames";
 import type { GameRequirements } from "@/lib/types";
 
 interface SteamAppDetails {
@@ -10,7 +11,25 @@ interface SteamAppDetails {
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ appid: string }> }) {
   const { appid } = await params;
-  if (!appid || !/^\d+$/.test(appid)) {
+  if (!appid) {
+    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+  }
+
+  if (appid.startsWith("local-")) {
+    const localGame = findLocalGame(appid.slice("local-".length));
+    if (!localGame) {
+      return NextResponse.json({ error: "Game not found" }, { status: 404 });
+    }
+    const game: GameRequirements = {
+      appid,
+      name: localGame.name,
+      minimum: localGame.minimum,
+      recommended: localGame.recommended,
+    };
+    return NextResponse.json(game);
+  }
+
+  if (!/^\d+$/.test(appid)) {
     return NextResponse.json({ error: "Invalid appid" }, { status: 400 });
   }
 
@@ -32,7 +51,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ appi
   const reqs = Array.isArray(details.pc_requirements) ? {} : details.pc_requirements ?? {};
 
   const game: GameRequirements = {
-    appid: parseInt(appid, 10),
+    appid,
     name: details.name,
     headerImage: details.header_image,
     minimum: parseSteamRequirements(reqs.minimum),

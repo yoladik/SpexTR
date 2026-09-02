@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 interface SearchResult {
-  appid: number;
+  appid: string;
   name: string;
   icon?: string;
 }
