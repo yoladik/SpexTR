@@ -1,5 +1,6 @@
 import { scoreCpu, scoreGpu, estimateCpuBaselineGhz, estimateGpuVramGB } from "./hardwareRank";
-import type { ComparisonResult, ComponentComparison, GameRequirements, PcSpecs, Verdict } from "./types";
+import { resolvePlatform } from "./platform";
+import type { ComparisonResult, ComponentComparison, FpsEstimate, GameRequirements, PcSpecs, Verdict } from "./types";
 
 function combine(min: Verdict, rec: Verdict): Verdict {
   // Meeting recommended => ok. Meeting only minimum => borderline. Below minimum => fail.
@@ -121,8 +122,72 @@ function compareScored(
   };
 }
 
+function compareOs(specs: PcSpecs, game: GameRequirements): ComponentComparison | null {
+  if (!game.platforms) return null;
+
+  const platform = resolvePlatform(specs.os);
+  const supported = game.platforms[platform];
+  const platformLabel = { windows: "Windows", mac: "macOS", linux: "Linux" }[platform];
+
+  return {
+    label: "Operační systém",
+    yourValue: specs.os,
+    minValue: undefined,
+    recommendedValue: undefined,
+    verdict: supported ? "ok" : "fail",
+    note: supported
+      ? undefined
+      : `Hra podle Steamu nemá ${platformLabel} verzi — na tvém OS se pravděpodobně vůbec nespustí (leda přes emulaci/Proton).`,
+  };
+}
+
+// Rough FPS ballpark from the overall verdict plus how far CPU/GPU sit above the recommended
+// bar. This is explicitly a vibe check, not a benchmark — Steam requirements themselves are
+// rarely precise, and our own CPU/GPU scores are ordinal tiers, not real performance numbers.
+function estimateFps(overall: Verdict, specs: PcSpecs, game: GameRequirements): FpsEstimate | undefined {
+  if (overall === "unknown") return undefined;
+
+  if (overall === "fail") {
+    return {
+      tier: "unplayable",
+      text: "Nehratelné (odhad pod ~20–30 FPS, nebo se hra nespustí vůbec) — nesplňuješ ani minimální požadavky.",
+    };
+  }
+
+  if (overall === "borderline") {
+    return {
+      tier: "low",
+      text: "~30 FPS (odhad, +/-) — splňuješ jen minimum, čekej nižší detaily a možné výpadky.",
+    };
+  }
+
+  const gpuScore = scoreGpu(specs.gpu);
+  const gpuRecScore = game.recommended?.gpu ? scoreGpu(game.recommended.gpu) : null;
+  const cpuScore = scoreCpu(specs.cpu);
+  const cpuRecScore = game.recommended?.cpu ? scoreCpu(game.recommended.cpu) : null;
+
+  const gpuMargin = gpuScore !== null && gpuRecScore !== null ? gpuScore - gpuRecScore : null;
+  const cpuMargin = cpuScore !== null && cpuRecScore !== null ? cpuScore - cpuRecScore : null;
+  const margin = gpuMargin ?? cpuMargin;
+
+  if (margin !== null && margin >= 800) {
+    return {
+      tier: "high",
+      text: "60–120+ FPS (odhad, +/-) — tvůj setup dost přesahuje doporučené požadavky, měl bys jet na vysoké nastavení s rezervou.",
+    };
+  }
+
+  return {
+    tier: "mid",
+    text: "~60 FPS (odhad, +/-) — splňuješ doporučené požadavky.",
+  };
+}
+
 export function compareSpecs(specs: PcSpecs, game: GameRequirements): ComparisonResult {
   const components: ComponentComparison[] = [];
+
+  const osComponent = compareOs(specs, game);
+  if (osComponent) components.push(osComponent);
 
   components.push(
     compareScored(
@@ -177,5 +242,10 @@ export function compareSpecs(specs: PcSpecs, game: GameRequirements): Comparison
     overallText = "Splňuješ doporučené požadavky na všech rozpoznaných komponentách — hra by měla jet plynule na vyšší nastavení.";
   }
 
-  return { components, overall, overallText };
+  if (osComponent?.verdict === "fail") {
+    overall = "fail";
+    overallText = osComponent.note ?? "Hra na tvém operačním systému podle Steamu neběží.";
+  }
+
+  return { components, overall, overallText, fpsEstimate: estimateFps(overall, specs, game) };
 }

@@ -5,6 +5,8 @@ import Link from "next/link";
 import type { GameRequirements, PcSpecs, ComparisonResult } from "@/lib/types";
 import { loadSpecs } from "@/lib/specsStorage";
 import { compareSpecs } from "@/lib/compare";
+import { resolvePlatform } from "@/lib/platform";
+import { addHistoryEntry } from "@/lib/historyStorage";
 import VerdictBadge from "@/components/VerdictBadge";
 
 export default function GamePage({ params }: { params: Promise<{ appid: string }> }) {
@@ -15,9 +17,11 @@ export default function GamePage({ params }: { params: Promise<{ appid: string }
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const loadedSpecs = loadSpecs();
     // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from localStorage on mount
-    setSpecs(loadSpecs());
-    fetch(`/api/game/${appid}`)
+    setSpecs(loadedSpecs);
+    const platform = resolvePlatform(loadedSpecs?.os ?? "Windows 11");
+    fetch(`/api/game/${appid}?platform=${platform}`)
       .then(async (res) => {
         if (!res.ok) throw new Error((await res.json()).error ?? "Chyba");
         return res.json();
@@ -26,6 +30,18 @@ export default function GamePage({ params }: { params: Promise<{ appid: string }
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [appid]);
+
+  useEffect(() => {
+    if (!game || !specs) return;
+    const result = compareSpecs(specs, game);
+    addHistoryEntry({
+      appid: game.appid,
+      name: game.name,
+      headerImage: game.headerImage,
+      overall: result.overall,
+      checkedAt: Date.now(),
+    });
+  }, [game, specs]);
 
   if (loading) return <main className="mx-auto max-w-xl px-4 py-10">Načítám...</main>;
 
@@ -73,6 +89,9 @@ export default function GamePage({ params }: { params: Promise<{ appid: string }
           <VerdictBadge verdict={result.overall} />
         </div>
         <p className="text-sm text-black/70">{result.overallText}</p>
+        {result.fpsEstimate && (
+          <p className="text-sm font-medium">Odhad výkonu: {result.fpsEstimate.text}</p>
+        )}
       </div>
 
       <div className="flex flex-col gap-4">

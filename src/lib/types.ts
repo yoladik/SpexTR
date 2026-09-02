@@ -21,6 +21,8 @@ export interface GameRequirements {
   headerImage?: string;
   minimum?: ParsedRequirements;
   recommended?: ParsedRequirements;
+  platforms?: { windows: boolean; mac: boolean; linux: boolean };
+  requirementsPlatform?: "windows" | "mac" | "linux";
 }
 
 export type Verdict = "ok" | "borderline" | "fail" | "unknown";
@@ -34,8 +36,16 @@ export interface ComponentComparison {
   note?: string;
 }
 
+export type FpsTier = "unplayable" | "low" | "mid" | "high";
+
+export interface FpsEstimate {
+  tier: FpsTier;
+  text: string;
+}
+
 export interface ComparisonResult {
   components: ComponentComparison[];
   overall: Verdict;
   overallText: string;
+  fpsEstimate?: FpsEstimate;
 }
