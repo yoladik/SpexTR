@@ -1,4 +1,4 @@
-import { scoreCpu, scoreGpu, estimateCpuBaselineGhz } from "./hardwareRank";
+import { scoreCpu, scoreGpu, estimateCpuBaselineGhz, estimateGpuVramGB } from "./hardwareRank";
 import type { ComparisonResult, ComponentComparison, GameRequirements, PcSpecs, Verdict } from "./types";
 
 function combine(min: Verdict, rec: Verdict): Verdict {
@@ -41,13 +41,37 @@ function meetsClockSpeedRequirement(yourName: string, requirementText: string): 
   return baseline >= requiredGhz - 0.15; // small tolerance, this is a rough guess either way
 }
 
+// "2 GB VRAM" / "512 MB video memory" style requirements, with no model name to score.
+function extractRequiredVramGB(text: string): number | null {
+  const patterns = [
+    /(\d+(?:\.\d+)?)\s*(GB|MB)\b[^.\n]{0,30}(?:VRAM|video memory|graphics memory|video RAM)/i,
+    /(?:VRAM|video memory|graphics memory|video RAM)[^.\n]{0,30}?(\d+(?:\.\d+)?)\s*(GB|MB)\b/i,
+  ];
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) {
+      const value = parseFloat(match[1]);
+      return match[2].toUpperCase() === "MB" ? value / 1024 : value;
+    }
+  }
+  return null;
+}
+
+function meetsVramRequirement(yourName: string, requirementText: string): boolean | null {
+  const requiredGB = extractRequiredVramGB(requirementText);
+  if (requiredGB === null) return null;
+  const baseline = estimateGpuVramGB(yourName);
+  if (baseline === null) return null;
+  return baseline >= requiredGB;
+}
+
 function compareScored(
   label: string,
   yourName: string,
   minName: string | undefined,
   recName: string | undefined,
   scoreFn: (name: string) => number | null,
-  estimateByClockSpeed = false
+  estimateFn?: (yourName: string, text: string) => boolean | null
 ): ComponentComparison {
   const yourScore = scoreFn(yourName);
   const minScore = minName ? scoreFn(minName) : null;
@@ -59,26 +83,27 @@ function compareScored(
   if (yourScore === null) {
     note = "Nepodařilo se rozpoznat model — porovnej ručně podle textu.";
   } else if (minScore === null) {
-    const meetsMin = minName && estimateByClockSpeed ? meetsClockSpeedRequirement(yourName, minName) : null;
-
     if (minName && GENERIC_LOW_BAR_GPU.test(minName)) {
       verdict = "ok";
       note =
         "Hra jen vyžaduje starou obecnou podporu DirectX/Shader Model (bez konkrétního modelu) — tvoje grafika ji bez problémů splňuje. Ten \"supported list\" v požadavcích je jen odkaz na stránku výrobce hry, Steam ho v datech nemá.";
-    } else if (meetsMin !== null) {
-      let meetsRec = meetsMin;
-      if (recName) {
-        if (recScore !== null) meetsRec = yourScore >= recScore;
-        else {
-          const recResult = meetsClockSpeedRequirement(yourName, recName);
-          if (recResult !== null) meetsRec = recResult;
-        }
-      }
-      verdict = meetsMin ? (meetsRec ? "ok" : "borderline") : "fail";
-      note =
-        "Hra uvádí jen hodinovou frekvenci, ne konkrétní model — tohle je odhad podle typického taktu tvého procesoru, ne jistota.";
     } else {
-      note = "Hra neuvádí rozpoznatelný model — porovnej ručně podle textu.";
+      const meetsMin = minName && estimateFn ? estimateFn(yourName, minName) : null;
+
+      if (meetsMin !== null) {
+        let meetsRec = meetsMin;
+        if (recName) {
+          if (recScore !== null) meetsRec = yourScore >= recScore;
+          else if (estimateFn) {
+            const recResult = estimateFn(yourName, recName);
+            if (recResult !== null) meetsRec = recResult;
+          }
+        }
+        verdict = meetsMin ? (meetsRec ? "ok" : "borderline") : "fail";
+        note = "Přesný model hra neuvádí, jen obecný parametr — tohle je odhad podle typických hodnot tvé komponenty, ne jistota.";
+      } else {
+        note = "Hra neuvádí rozpoznatelný model — porovnej ručně podle textu.";
+      }
     }
   } else {
     const meetsMin = yourScore >= minScore;
@@ -100,10 +125,24 @@ export function compareSpecs(specs: PcSpecs, game: GameRequirements): Comparison
   const components: ComponentComparison[] = [];
 
   components.push(
-    compareScored("Procesor (CPU)", specs.cpu, game.minimum?.cpu, game.recommended?.cpu, scoreCpu, true)
+    compareScored(
+      "Procesor (CPU)",
+      specs.cpu,
+      game.minimum?.cpu,
+      game.recommended?.cpu,
+      scoreCpu,
+      meetsClockSpeedRequirement
+    )
   );
   components.push(
-    compareScored("Grafika (GPU)", specs.gpu, game.minimum?.gpu, game.recommended?.gpu, scoreGpu)
+    compareScored(
+      "Grafika (GPU)",
+      specs.gpu,
+      game.minimum?.gpu,
+      game.recommended?.gpu,
+      scoreGpu,
+      meetsVramRequirement
+    )
   );
   components.push(
     compareNumeric("Paměť (RAM)", specs.ramGB, game.minimum?.ramGB, game.recommended?.ramGB)

@@ -60,6 +60,90 @@ export function estimateCpuBaselineGhz(name: string): number | null {
   return null;
 }
 
+// Best-effort typical VRAM (GB) per GPU model, used to guess pass/fail when a game states a bare
+// VRAM requirement ("2 GB VRAM") instead of naming a GPU. Ordered most-specific pattern first
+// since e.g. "RTX 4070 Ti Super" must not be caught by the plain "RTX 4070" rule below it.
+// Where a model shipped in multiple VRAM sizes, this picks the smaller/base one (conservative).
+const GPU_VRAM_TABLE: Array<{ pattern: RegExp; gb: number }> = [
+  { pattern: /GTX\s?1060\s?3\s?GB/, gb: 3 },
+  { pattern: /GT\s?1030/, gb: 2 },
+  { pattern: /GTX\s?1050\s?TI/, gb: 4 },
+  { pattern: /GTX\s?1050/, gb: 2 },
+  { pattern: /GTX\s?1060/, gb: 6 },
+  { pattern: /GTX\s?1070\s?TI/, gb: 8 },
+  { pattern: /GTX\s?1070/, gb: 8 },
+  { pattern: /GTX\s?1080\s?TI/, gb: 11 },
+  { pattern: /GTX\s?1080/, gb: 8 },
+  { pattern: /GTX\s?1650\s?SUPER/, gb: 4 },
+  { pattern: /GTX\s?1650/, gb: 4 },
+  { pattern: /GTX\s?1660\s?(SUPER|TI)/, gb: 6 },
+  { pattern: /GTX\s?1660/, gb: 6 },
+  { pattern: /RTX\s?2060\s?SUPER/, gb: 8 },
+  { pattern: /RTX\s?2060/, gb: 6 },
+  { pattern: /RTX\s?2070\s?SUPER/, gb: 8 },
+  { pattern: /RTX\s?2070/, gb: 8 },
+  { pattern: /RTX\s?2080\s?TI/, gb: 11 },
+  { pattern: /RTX\s?2080/, gb: 8 },
+  { pattern: /RTX\s?3050/, gb: 8 },
+  { pattern: /RTX\s?3060\s?TI/, gb: 8 },
+  { pattern: /RTX\s?3060/, gb: 12 },
+  { pattern: /RTX\s?3070\s?TI/, gb: 8 },
+  { pattern: /RTX\s?3070/, gb: 8 },
+  { pattern: /RTX\s?3080\s?TI/, gb: 12 },
+  { pattern: /RTX\s?3080/, gb: 10 },
+  { pattern: /RTX\s?3090\s?TI/, gb: 24 },
+  { pattern: /RTX\s?3090/, gb: 24 },
+  { pattern: /RTX\s?4060\s?TI/, gb: 8 },
+  { pattern: /RTX\s?4060/, gb: 8 },
+  { pattern: /RTX\s?4070\s?TI\s?SUPER/, gb: 16 },
+  { pattern: /RTX\s?4070\s?TI/, gb: 12 },
+  { pattern: /RTX\s?4070\s?SUPER/, gb: 12 },
+  { pattern: /RTX\s?4070/, gb: 12 },
+  { pattern: /RTX\s?4080\s?SUPER/, gb: 16 },
+  { pattern: /RTX\s?4080/, gb: 16 },
+  { pattern: /RTX\s?4090/, gb: 24 },
+  { pattern: /RTX\s?5060/, gb: 8 },
+  { pattern: /RTX\s?5070\s?TI/, gb: 16 },
+  { pattern: /RTX\s?5070/, gb: 12 },
+  { pattern: /RTX\s?5080/, gb: 16 },
+  { pattern: /RTX\s?5090/, gb: 32 },
+  { pattern: /RX\s?570/, gb: 4 },
+  { pattern: /RX\s?580/, gb: 8 },
+  { pattern: /RX\s?590/, gb: 8 },
+  { pattern: /RX\s?5500\s?XT/, gb: 8 },
+  { pattern: /RX\s?5600\s?XT/, gb: 6 },
+  { pattern: /RX\s?5700\s?XT/, gb: 8 },
+  { pattern: /RX\s?5700/, gb: 8 },
+  { pattern: /RX\s?6600\s?XT/, gb: 8 },
+  { pattern: /RX\s?6600/, gb: 8 },
+  { pattern: /RX\s?6650\s?XT/, gb: 8 },
+  { pattern: /RX\s?6700\s?XT/, gb: 12 },
+  { pattern: /RX\s?6750\s?XT/, gb: 12 },
+  { pattern: /RX\s?6800\s?XT/, gb: 16 },
+  { pattern: /RX\s?6800/, gb: 16 },
+  { pattern: /RX\s?6900\s?XT/, gb: 16 },
+  { pattern: /RX\s?6950\s?XT/, gb: 16 },
+  { pattern: /RX\s?7600/, gb: 8 },
+  { pattern: /RX\s?7700\s?XT/, gb: 12 },
+  { pattern: /RX\s?7800\s?XT/, gb: 16 },
+  { pattern: /RX\s?7900\s?GRE/, gb: 16 },
+  { pattern: /RX\s?7900\s?XTX/, gb: 24 },
+  { pattern: /RX\s?7900\s?XT/, gb: 20 },
+  { pattern: /ARC\s?A380/, gb: 6 },
+  { pattern: /ARC\s?A750/, gb: 8 },
+  { pattern: /ARC\s?A770/, gb: 8 },
+  { pattern: /ARC\s?B580/, gb: 12 },
+  { pattern: /UHD|IRIS|VEGA\s?(3|6|8|11)\b/, gb: 1 },
+];
+
+export function estimateGpuVramGB(name: string): number | null {
+  const s = name.toUpperCase();
+  for (const { pattern, gb } of GPU_VRAM_TABLE) {
+    if (pattern.test(s)) return gb;
+  }
+  return null;
+}
+
 export function scoreGpu(name: string): number | null {
   const s = name.toUpperCase();
 
