@@ -174,8 +174,16 @@ export function scoreGpu(name: string): number | null {
     if (amdMatch[2] === "XT") score += 40;
     return score;
   }
-  const oldAmdMatch = s.match(/\bHD\s?(\d{3,4})/);
-  if (oldAmdMatch) return parseInt(oldAmdMatch[1], 10) * 0.6;
+
+  // Pre-2016ish cards (GeForce "9600 GT" / "8800 GTX" / bare "GeForce 560", Radeon "HD 6570")
+  // used model numbers on a totally different scale than the modern GTX10xx+/RTX/RX naming
+  // this scorer is built around - e.g. "HD 6570" is a low-end 2011 card, but 6570 read on the
+  // modern scale would out-rank an RTX 4090. Rather than fake a precise position for them, pin
+  // them all to one low score: anything in our own CPU/GPU picker is going to clear it anyway,
+  // which is all a legacy game's ancient minimum requirement actually needs to prove.
+  if (/\bHD\s?\d{3,4}\b/.test(s)) return 400;
+  if (/\b\d{3,4}\s?(GTX|GTS|GT|GS)\b/.test(s)) return 400;
+  if (/GEFORCE\s?\d{3}\b(?!\d)/.test(s)) return 400;
 
   // Intel Arc
   const arcMatch = s.match(/ARC\s?A(\d{3})/);
