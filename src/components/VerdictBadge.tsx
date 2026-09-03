@@ -11,7 +11,7 @@ const STYLES: Record<
     boxClassName: "border-green-300 bg-green-50 text-green-800 dark:border-green-700 dark:bg-green-950 dark:text-green-300",
   },
   borderline: {
-    label: "Jen tak tak",
+    label: "Na hraně",
     pillClassName: "bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-400/20 dark:text-yellow-200 dark:border-yellow-400",
     textClassName: "text-yellow-600 dark:text-yellow-200",
     boxClassName: "border-yellow-300 bg-yellow-50 text-yellow-800 dark:border-yellow-400 dark:bg-yellow-400/20 dark:text-yellow-200",
