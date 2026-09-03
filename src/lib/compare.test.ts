@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { compareSpecs } from "./compare";
+import { LOCAL_GAMES } from "./localGames";
 import type { GameRequirements, PcSpecs } from "./types";
 
 const baseSpecs: PcSpecs = {
@@ -73,4 +74,40 @@ describe("compareSpecs", () => {
       expect(result.components.some((c) => c.label === "Operační systém")).toBe(false);
     });
   });
+});
+
+describe("compareSpecs against the whole local (non-Steam) games database", () => {
+  const strongSpecs: PcSpecs = {
+    cpu: "AMD Ryzen 9 7900X",
+    gpu: "NVIDIA RTX 4080 Super",
+    ramGB: 32,
+    storageFreeGB: 500,
+    os: "Windows 11",
+  };
+  const weakSpecs: PcSpecs = {
+    cpu: "Intel Celeron G5905",
+    gpu: "Intel UHD Graphics 630",
+    ramGB: 4,
+    storageFreeGB: 10,
+    os: "Windows 11",
+  };
+
+  for (const game of LOCAL_GAMES) {
+    it(`${game.name}: doesn't crash and recognizes at least CPU or GPU`, () => {
+      const asGame: GameRequirements = { ...game, appid: `local-${game.id}` };
+      const strongResult = compareSpecs(strongSpecs, asGame);
+      const weakResult = compareSpecs(weakSpecs, asGame);
+
+      // A high-end rig shouldn't come back worse than a weak one, and at least the CPU/GPU
+      // cards should resolve to something other than "unknown" - otherwise the entry's spec
+      // text isn't actually being parsed/scored, which defeats the point of adding it.
+      const verdictRank = { unknown: -1, fail: 0, borderline: 1, ok: 2 };
+      expect(verdictRank[strongResult.overall]).toBeGreaterThanOrEqual(verdictRank[weakResult.overall]);
+
+      const recognized = strongResult.components.filter(
+        (c) => (c.label === "Procesor (CPU)" || c.label === "Grafika (GPU)") && c.verdict !== "unknown"
+      );
+      expect(recognized.length).toBeGreaterThan(0);
+    });
+  }
 });

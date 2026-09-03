@@ -4,25 +4,32 @@
  * for the common families people actually have. Higher score = faster.
  */
 
+// Laptop-class chips (Intel "...U", AMD Ryzen "...U") run at a fraction of the power limit of
+// their same-numbered desktop part and perform meaningfully worse - an i5-7300U (2 cores) is
+// nowhere near a desktop i5 of the same generation. Same idea as the GPU laptop discount below.
+const MOBILE_CPU_DISCOUNT = 0.82;
+
 export function scoreCpu(name: string): number | null {
   const s = name.toUpperCase();
 
   // Intel Core (i3/i5/i7/i9), old-style "i5-10400" or "i7 12700K"
-  const intelMatch = s.match(/I([3579])[\s-]?(\d{3,5})/);
+  const intelMatch = s.match(/I([3579])[\s-]?(\d{3,5})(U|Y)?/);
   if (intelMatch) {
     const tier = parseInt(intelMatch[1], 10); // 3,5,7,9
     const modelNum = intelMatch[2];
     const gen = modelNum.length >= 4 ? parseInt(modelNum.slice(0, -3), 10) : parseInt(modelNum[0], 10);
-    return tier * 1000 + gen * 10;
+    const score = tier * 1000 + gen * 10;
+    return intelMatch[3] ? score * MOBILE_CPU_DISCOUNT : score;
   }
 
-  // AMD Ryzen (3/5/7/9), e.g. "RYZEN 5 5600X"
-  const ryzenMatch = s.match(/RYZEN\s?([3579])\s?(\d{3,5})/);
+  // AMD Ryzen (3/5/7/9), e.g. "RYZEN 5 5600X" or "RYZEN 5 5600U" (mobile)
+  const ryzenMatch = s.match(/RYZEN\s?([3579])\s?(\d{3,5})(U)?/);
   if (ryzenMatch) {
     const tier = parseInt(ryzenMatch[1], 10);
     const modelNum = ryzenMatch[2];
     const gen = parseInt(modelNum[0], 10);
-    return tier * 1000 + gen * 10;
+    const score = tier * 1000 + gen * 10;
+    return ryzenMatch[3] ? score * MOBILE_CPU_DISCOUNT : score;
   }
 
   // Older/low-end families

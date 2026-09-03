@@ -12,6 +12,21 @@ describe("scoreCpu", () => {
   it("returns null for unrecognized text", () => {
     expect(scoreCpu("some made up processor xyz")).toBeNull();
   });
+
+  it("scores a mobile/laptop-suffix CPU lower than a same-tier desktop part (regression: Fortnite recommended CPU bug)", () => {
+    // Found via a sweep of every local game: Fortnite's recommended CPU is a laptop i5-7300U,
+    // whose raw model number scored *higher* than a desktop Ryzen 5 5600X, wrongly telling a
+    // 5600X owner they only meet minimum requirements.
+    const desktop = scoreCpu("AMD Ryzen 5 5600X")!;
+    const mobileIntel = scoreCpu("Intel Core i5-7300U")!;
+    expect(mobileIntel).toBeLessThan(desktop);
+  });
+
+  it("does not mistake a desktop K/X suffix for a mobile U suffix", () => {
+    expect(scoreCpu("Intel Core i9-13900K")).not.toBeNull();
+    expect(scoreCpu("AMD Ryzen 7 7700X")).not.toBeNull();
+    expect(scoreCpu("Intel Core i9-13900K")!).toBeGreaterThan(scoreCpu("Intel Core i5-7300U")!);
+  });
 });
 
 describe("scoreGpu", () => {
