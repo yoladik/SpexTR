@@ -7,7 +7,15 @@ import { loadSpecs } from "@/lib/specsStorage";
 import { compareSpecs } from "@/lib/compare";
 import { resolvePlatform } from "@/lib/platform";
 import { addHistoryEntry } from "@/lib/historyStorage";
-import VerdictBadge from "@/components/VerdictBadge";
+import VerdictBadge, { verdictLabel, verdictBoxClassName } from "@/components/VerdictBadge";
+
+function splitAlternatives(value?: string): string[] {
+  if (!value) return ["—"];
+  return value
+    .split(/\s*\/\s*/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
 
 export default function GamePage({ params }: { params: Promise<{ appid: string }> }) {
   const { appid } = use(params);
@@ -99,20 +107,32 @@ export default function GamePage({ params }: { params: Promise<{ appid: string }
           <div key={c.label} className="flex flex-col gap-3 rounded-xl border border-black/10 p-4">
             <h3 className="font-medium">{c.label}</h3>
 
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <p className="text-black/50">Minimum</p>
-                <p>{c.minValue ?? "—"}</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1 rounded-lg border border-black/10 p-3">
+                <p className="text-xs text-black/50">Minimum</p>
+                {splitAlternatives(c.minValue).map((line, i) => (
+                  <p key={i} className="text-sm">
+                    {line}
+                  </p>
+                ))}
               </div>
-              <div>
-                <p className="text-black/50">Doporučeno</p>
-                <p>{c.recommendedValue ?? "—"}</p>
+              <div className="flex flex-col gap-1 rounded-lg border border-black/10 p-3">
+                <p className="text-xs text-black/50">Doporučeno</p>
+                {splitAlternatives(c.recommendedValue).map((line, i) => (
+                  <p key={i} className="text-sm">
+                    {line}
+                  </p>
+                ))}
               </div>
             </div>
 
-            <div className="border-t border-black/10 pt-3">
-              <VerdictBadge verdict={c.verdict} variant="text" />
-              <p className="text-sm text-black/50">{c.yourValue}</p>
+            <div className={`flex flex-col gap-1 rounded-lg border p-3 ${verdictBoxClassName(c.verdict)}`}>
+              <p className="text-lg font-semibold">{verdictLabel(c.verdict)}</p>
+              {splitAlternatives(c.yourValue).map((line, i) => (
+                <p key={i} className="text-sm opacity-70">
+                  {line}
+                </p>
+              ))}
             </div>
 
             {c.note && <p className="text-xs text-black/40">{c.note}</p>}
