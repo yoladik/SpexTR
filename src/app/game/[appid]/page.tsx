@@ -110,12 +110,9 @@ export default function GamePage({ params }: { params: Promise<{ appid: string }
               </div>
             </div>
 
-            <div className="flex items-center justify-between border-t border-black/10 pt-3">
-              <div className="text-sm">
-                <p className="text-black/50">Tvoje</p>
-                <p>{c.yourValue}</p>
-              </div>
-              <VerdictBadge verdict={c.verdict} />
+            <div className="border-t border-black/10 pt-3">
+              <VerdictBadge verdict={c.verdict} variant="text" />
+              <p className="text-sm text-black/50">{c.yourValue}</p>
             </div>
 
             {c.note && <p className="text-xs text-black/40">{c.note}</p>}
