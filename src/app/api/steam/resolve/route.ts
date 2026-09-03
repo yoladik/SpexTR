@@ -22,10 +22,14 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const url = `https://api.steampowered.com/ISteamUser/ResolveVanityURL/v1/?key=${encodeURIComponent(key)}&vanityurl=${encodeURIComponent(parsed.vanity)}`;
+  const url = `https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=${encodeURIComponent(key)}&vanityurl=${encodeURIComponent(parsed.vanity)}`;
   const res = await fetch(url);
   if (!res.ok) {
-    return NextResponse.json({ error: "Steam API selhalo" }, { status: 502 });
+    const body = await res.text().catch(() => "");
+    return NextResponse.json(
+      { error: `Steam API selhalo (HTTP ${res.status})`, detail: body.slice(0, 300) },
+      { status: 502 }
+    );
   }
 
   const data = await res.json();

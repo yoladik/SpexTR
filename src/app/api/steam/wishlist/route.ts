@@ -30,8 +30,14 @@ export async function GET(req: NextRequest) {
   try {
     const games = await fetchViaLegacyWishlist(steamid);
     return NextResponse.json({ games });
-  } catch {
-    return NextResponse.json({ error: "Wishlist se nepodařilo načíst. Je nastavená jako veřejná?" }, { status: 502 });
+  } catch (e) {
+    return NextResponse.json(
+      {
+        error: "Wishlist se nepodařilo načíst. Je nastavená jako veřejná?",
+        detail: e instanceof Error ? e.message : String(e),
+      },
+      { status: 502 }
+    );
   }
 }
 

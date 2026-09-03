@@ -14,10 +14,14 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${encodeURIComponent(key)}&steamid=${steamid}&include_appinfo=1&format=json`;
+  const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${encodeURIComponent(key)}&steamid=${steamid}&include_appinfo=1&format=json`;
   const res = await fetch(url);
   if (!res.ok) {
-    return NextResponse.json({ error: "Steam API selhalo" }, { status: 502 });
+    const body = await res.text().catch(() => "");
+    return NextResponse.json(
+      { error: `Steam API selhalo (HTTP ${res.status})`, detail: body.slice(0, 300) },
+      { status: 502 }
+    );
   }
 
   const data = await res.json();

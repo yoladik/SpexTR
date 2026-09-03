@@ -70,7 +70,9 @@ export default function LibraryPage() {
         `/api/steam/resolve?input=${encodeURIComponent(profileInput)}${apiKey ? `&key=${encodeURIComponent(apiKey)}` : ""}`
       );
       const resolveData = await resolveRes.json();
-      if (!resolveRes.ok) throw new Error(resolveData.error ?? "Profil se nepodařilo najít.");
+      if (!resolveRes.ok) {
+        throw new Error([resolveData.error, resolveData.detail].filter(Boolean).join(" — ") || "Profil se nepodařilo najít.");
+      }
       const steamid = resolveData.steamid as string;
 
       const listUrl =
@@ -79,7 +81,9 @@ export default function LibraryPage() {
           : `/api/steam/library?steamid=${steamid}&key=${encodeURIComponent(apiKey)}`;
       const listRes = await fetch(listUrl);
       const listData = await listRes.json();
-      if (!listRes.ok) throw new Error(listData.error ?? "Načtení se nepodařilo.");
+      if (!listRes.ok) {
+        throw new Error([listData.error, listData.detail].filter(Boolean).join(" — ") || "Načtení se nepodařilo.");
+      }
 
       const allGames = listData.games as GameEntry[];
       if (allGames.length > MAX_GAMES) setTruncated(true);
