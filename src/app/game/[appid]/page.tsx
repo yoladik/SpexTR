@@ -91,12 +91,12 @@ export default function GamePage({ params }: { params: Promise<{ appid: string }
       )}
       <h1 className="text-2xl font-bold">{game.name}</h1>
 
-      <div className="flex flex-col gap-3 rounded-xl border border-black/10 p-6">
+      <div className="flex flex-col gap-3 rounded-xl border border-black/10 dark:border-white/15 p-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Celkové zhodnocení</h2>
           <VerdictBadge verdict={result.overall} />
         </div>
-        <p className="text-sm text-black/70">{result.overallText}</p>
+        <p className="text-sm text-black/70 dark:text-white/70">{result.overallText}</p>
         {result.fpsEstimate && (
           <p className="text-sm font-medium">Odhad výkonu: {result.fpsEstimate.text}</p>
         )}
@@ -104,20 +104,20 @@ export default function GamePage({ params }: { params: Promise<{ appid: string }
 
       <div className="flex flex-col gap-4">
         {result.components.map((c) => (
-          <div key={c.label} className="flex flex-col gap-3 rounded-xl border border-black/10 p-4">
+          <div key={c.label} className="flex flex-col gap-3 rounded-xl border border-black/10 dark:border-white/15 p-4">
             <h3 className="font-medium">{c.label}</h3>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1 rounded-lg border border-black/10 p-3">
-                <p className="text-xs text-black/50">Minimum</p>
+              <div className="flex flex-col gap-1 rounded-lg border border-black/10 dark:border-white/15 p-3">
+                <p className="text-xs text-black/50 dark:text-white/50">Minimum</p>
                 {splitAlternatives(c.minValue).map((line, i) => (
                   <p key={i} className="text-sm">
                     {line}
                   </p>
                 ))}
               </div>
-              <div className="flex flex-col gap-1 rounded-lg border border-black/10 p-3">
-                <p className="text-xs text-black/50">Doporučeno</p>
+              <div className="flex flex-col gap-1 rounded-lg border border-black/10 dark:border-white/15 p-3">
+                <p className="text-xs text-black/50 dark:text-white/50">Doporučeno</p>
                 {splitAlternatives(c.recommendedValue).map((line, i) => (
                   <p key={i} className="text-sm">
                     {line}
@@ -135,13 +135,13 @@ export default function GamePage({ params }: { params: Promise<{ appid: string }
               ))}
             </div>
 
-            {c.note && <p className="text-xs text-black/40">{c.note}</p>}
+            {c.note && <p className="text-xs text-black/40 dark:text-white/40">{c.note}</p>}
           </div>
         ))}
       </div>
 
       {(!game.minimum && !game.recommended) && (
-        <p className="text-sm text-black/50">Tahle hra na Steamu neuvádí systémové požadavky.</p>
+        <p className="text-sm text-black/50 dark:text-white/50">Tahle hra na Steamu neuvádí systémové požadavky.</p>
       )}
     </main>
   );

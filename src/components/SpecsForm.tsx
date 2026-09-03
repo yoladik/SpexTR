@@ -23,7 +23,7 @@ export default function SpecsForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 rounded-xl border border-black/10 p-6">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 rounded-xl border border-black/10 dark:border-white/15 p-6">
       <h2 className="text-lg font-semibold">Tvoje PC specs</h2>
 
       <label className="flex flex-col gap-1 text-sm">
@@ -34,7 +34,7 @@ export default function SpecsForm({
           value={specs.cpu}
           onChange={(e) => setSpecs({ ...specs, cpu: e.target.value })}
           placeholder="začni psát nebo vyber ze seznamu, např. Intel Core i5-10400"
-          className="rounded-lg border border-black/15 px-3 py-2"
+          className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2"
         />
         <datalist id="cpu-options">
           {CPU_OPTIONS.map((cpu) => (
@@ -51,7 +51,7 @@ export default function SpecsForm({
           value={specs.gpu}
           onChange={(e) => setSpecs({ ...specs, gpu: e.target.value })}
           placeholder="začni psát nebo vyber ze seznamu, např. NVIDIA RTX 3060"
-          className="rounded-lg border border-black/15 px-3 py-2"
+          className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2"
         />
         <datalist id="gpu-options">
           {GPU_OPTIONS.map((gpu) => (
@@ -67,7 +67,7 @@ export default function SpecsForm({
             required
             value={specs.ramGB}
             onChange={(e) => setSpecs({ ...specs, ramGB: Number(e.target.value) })}
-            className="rounded-lg border border-black/15 px-3 py-2"
+            className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2"
           >
             {RAM_OPTIONS_GB.map((gb) => (
               <option key={gb} value={gb}>
@@ -86,7 +86,7 @@ export default function SpecsForm({
             value={specs.storageFreeGB}
             onChange={(e) => setSpecs({ ...specs, storageFreeGB: Number(e.target.value) })}
             onFocus={(e) => e.target.select()}
-            className="rounded-lg border border-black/15 px-3 py-2"
+            className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2"
           />
         </label>
       </div>
@@ -96,7 +96,7 @@ export default function SpecsForm({
         <select
           value={specs.os}
           onChange={(e) => setSpecs({ ...specs, os: e.target.value })}
-          className="rounded-lg border border-black/15 px-3 py-2"
+          className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2"
         >
           {OS_OPTIONS.map((os) => (
             <option key={os} value={os}>
@@ -108,7 +108,7 @@ export default function SpecsForm({
 
       <button
         type="submit"
-        className="mt-2 rounded-lg bg-black px-4 py-2 font-medium text-white hover:bg-black/80"
+        className="mt-2 rounded-lg bg-black px-4 py-2 font-medium text-white hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80"
       >
         Uložit specs
       </button>

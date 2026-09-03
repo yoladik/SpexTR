@@ -58,7 +58,7 @@ export default function ComparePage() {
       </Link>
       <div>
         <h1 className="text-2xl font-bold">Porovnání víc her</h1>
-        <p className="text-black/60">Přidej hry, co tě zajímají, a uvidíš je vedle sebe.</p>
+        <p className="text-black/60 dark:text-white/60">Přidej hry, co tě zajímají, a uvidíš je vedle sebe.</p>
       </div>
 
       <GameSearch
@@ -67,13 +67,13 @@ export default function ComparePage() {
       />
 
       {list.length === 0 ? (
-        <p className="text-sm text-black/50">Zatím žádné hry k porovnání.</p>
+        <p className="text-sm text-black/50 dark:text-white/50">Zatím žádné hry k porovnání.</p>
       ) : (
         <ul className="flex flex-col gap-3">
           {list.map((entry) => {
             const result = results[entry.appid];
             return (
-              <li key={entry.appid} className="flex flex-col gap-2 rounded-xl border border-black/10 p-4">
+              <li key={entry.appid} className="flex flex-col gap-2 rounded-xl border border-black/10 dark:border-white/15 p-4">
                 <div className="flex items-center justify-between">
                   <Link href={`/game/${entry.appid}`} className="font-medium hover:underline">
                     {entry.name}
@@ -84,17 +84,17 @@ export default function ComparePage() {
                     )}
                     <button
                       onClick={() => setList(removeFromCompareList(entry.appid))}
-                      className="text-sm text-black/40 hover:text-black"
+                      className="text-sm text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white"
                       aria-label={`Odebrat ${entry.name}`}
                     >
                       ✕
                     </button>
                   </div>
                 </div>
-                {result === "loading" && <p className="text-sm text-black/50">Načítám...</p>}
+                {result === "loading" && <p className="text-sm text-black/50 dark:text-white/50">Načítám...</p>}
                 {result === "error" && <p className="text-sm text-red-600">Nepodařilo se načíst.</p>}
                 {result && result !== "loading" && result !== "error" && result.fpsEstimate && (
-                  <p className="text-sm text-black/70">{result.fpsEstimate.text}</p>
+                  <p className="text-sm text-black/70 dark:text-white/70">{result.fpsEstimate.text}</p>
                 )}
               </li>
             );

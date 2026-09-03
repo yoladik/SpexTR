@@ -25,7 +25,7 @@ export default function Home() {
     <main className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-10">
       <div>
         <h1 className="text-2xl font-bold">SpexTR</h1>
-        <p className="text-black/60">Zjisti, jestli tvůj počítač utáhne hru, kterou chceš hrát.</p>
+        <p className="text-black/60 dark:text-white/60">Zjisti, jestli tvůj počítač utáhne hru, kterou chceš hrát.</p>
       </div>
 
       {!specs || editing ? (
@@ -37,7 +37,7 @@ export default function Home() {
           }}
         />
       ) : (
-        <div className="flex flex-col gap-2 rounded-xl border border-black/10 p-6">
+        <div className="flex flex-col gap-2 rounded-xl border border-black/10 dark:border-white/15 p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Tvoje PC specs</h2>
             <button onClick={() => setEditing(true)} className="text-sm underline">
