@@ -96,10 +96,9 @@ export default function GamePage({ params }: { params: Promise<{ appid: string }
           <h2 className="text-lg font-semibold">Celkové zhodnocení</h2>
           <VerdictBadge verdict={result.overall} />
         </div>
-        <p className="text-sm text-black/70 dark:text-white/70">{result.overallText}</p>
-        {result.fpsEstimate && (
-          <p className="text-sm font-medium">Odhad výkonu: {result.fpsEstimate.text}</p>
-        )}
+        <p className="text-sm font-medium">
+          {result.fpsEstimate ? result.fpsEstimate.text : result.overallText}
+        </p>
       </div>
 
       <div className="flex flex-col gap-4">

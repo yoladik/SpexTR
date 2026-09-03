@@ -150,14 +150,14 @@ function estimateFps(overall: Verdict, specs: PcSpecs, game: GameRequirements): 
   if (overall === "fail") {
     return {
       tier: "unplayable",
-      text: "Nehratelné (odhad pod ~20–30 FPS, nebo se hra nespustí vůbec) — nesplňuješ ani minimální požadavky.",
+      text: "Nehratelné — nesplňuješ ani minimální požadavky.",
     };
   }
 
   if (overall === "borderline") {
     return {
       tier: "low",
-      text: "~30 FPS (odhad, +/-) — splňuješ jen minimum, čekej nižší detaily a možné výpadky.",
+      text: "~30 FPS — splňuješ jen minimum.",
     };
   }
 
@@ -173,13 +173,13 @@ function estimateFps(overall: Verdict, specs: PcSpecs, game: GameRequirements): 
   if (margin !== null && margin >= 800) {
     return {
       tier: "high",
-      text: "60–120+ FPS (odhad, +/-) — tvůj setup dost přesahuje doporučené požadavky, měl bys jet na vysoké nastavení s rezervou.",
+      text: "60–120+ FPS — přesahuješ doporučené požadavky.",
     };
   }
 
   return {
     tier: "mid",
-    text: "~60 FPS (odhad, +/-) — splňuješ doporučené požadavky.",
+    text: "~60 FPS — splňuješ doporučené požadavky.",
   };
 }
 
