@@ -12,9 +12,9 @@ const STYLES: Record<
   },
   borderline: {
     label: "Jen tak tak",
-    pillClassName: "bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-400/20 dark:text-yellow-200 dark:border-yellow-400",
-    textClassName: "text-yellow-600 dark:text-yellow-300",
-    boxClassName: "border-yellow-300 bg-yellow-50 text-yellow-800 dark:border-yellow-400 dark:bg-yellow-400/20 dark:text-yellow-200",
+    pillClassName: "bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-400/20 dark:text-yellow-300 dark:border-yellow-400",
+    textClassName: "text-yellow-600 dark:text-yellow-400",
+    boxClassName: "border-yellow-300 bg-yellow-50 text-yellow-800 dark:border-yellow-400 dark:bg-yellow-400/20 dark:text-yellow-300",
   },
   fail: {
     label: "Nesplňuješ",
