@@ -24,7 +24,7 @@ export default function HistoryList() {
           <li key={h.appid}>
             <Link
               href={`/game/${h.appid}`}
-              className="flex items-center justify-between gap-3 py-2 hover:bg-black/5 dark:hover:bg-white/10"
+              className="flex items-center justify-between gap-3 py-2 transition-colors hover:bg-black/5 dark:hover:bg-white/10"
             >
               <span className="text-sm">{h.name}</span>
               <VerdictBadge verdict={h.overall} />

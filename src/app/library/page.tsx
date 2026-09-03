@@ -141,14 +141,14 @@ export default function LibraryPage() {
           <button
             onClick={() => load("wishlist")}
             disabled={loadingSource !== null || !profileInput}
-            className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-black/80 disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-white/80"
+            className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white transition-all hover:bg-black/80 active:scale-[0.98] disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-white/80"
           >
             {loadingSource === "wishlist" ? "Načítám..." : "Načíst wishlist"}
           </button>
           <button
             onClick={() => load("library")}
             disabled={loadingSource !== null || !profileInput || !apiKey}
-            className="rounded-lg border border-black/20 dark:border-white/25 px-4 py-2 text-sm font-medium hover:bg-black/5 dark:hover:bg-white/10 disabled:opacity-50"
+            className="rounded-lg border border-black/20 dark:border-white/25 px-4 py-2 text-sm font-medium transition-all hover:bg-black/5 active:scale-[0.98] disabled:opacity-50 dark:hover:bg-white/10"
             title={!apiKey ? "Potřebuje API klíč" : undefined}
           >
             {loadingSource === "library" ? "Načítám..." : "Načíst celou knihovnu"}
@@ -166,7 +166,10 @@ export default function LibraryPage() {
           {games.map((g) => {
             const result = results[g.appid];
             return (
-              <li key={g.appid} className="flex flex-col gap-2 rounded-xl border border-black/10 dark:border-white/15 p-4">
+              <li
+                key={g.appid}
+                className="flex flex-col gap-2 rounded-xl border border-black/10 dark:border-white/15 p-4 animate-fade-in"
+              >
                 <div className="flex items-center justify-between">
                   <Link href={`/game/${g.appid}`} className="font-medium hover:underline">
                     {g.name ?? `appid ${g.appid}`}
@@ -175,7 +178,9 @@ export default function LibraryPage() {
                     <VerdictBadge verdict={result.overall} />
                   )}
                 </div>
-                {result === "loading" && <p className="text-sm text-black/50 dark:text-white/50">Načítám...</p>}
+                {result === "loading" && (
+                  <p className="text-sm text-black/50 dark:text-white/50 animate-pulse">Načítám...</p>
+                )}
                 {result === "error" && <p className="text-sm text-red-600">Nepodařilo se načíst.</p>}
                 {result && result !== "loading" && result !== "error" && result.fpsEstimate && (
                   <p className="text-sm text-black/70 dark:text-white/70">{result.fpsEstimate.text}</p>

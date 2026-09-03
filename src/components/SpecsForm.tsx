@@ -34,7 +34,7 @@ export default function SpecsForm({
             const preset = PC_PRESETS.find((p) => p.id === e.target.value);
             if (preset) setSpecs({ ...specs, cpu: preset.cpu, gpu: preset.gpu, ramGB: preset.ramGB });
           }}
-          className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2"
+          className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2 transition-colors focus:border-black/40 dark:focus:border-white/40"
         >
           <option value="">-- vybrat ručně po komponentách níže --</option>
           {PC_PRESETS.map((p) => (
@@ -56,7 +56,7 @@ export default function SpecsForm({
           value={specs.cpu}
           onChange={(e) => setSpecs({ ...specs, cpu: e.target.value })}
           placeholder="začni psát nebo vyber ze seznamu, např. Intel Core i5-10400"
-          className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2"
+          className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2 transition-colors focus:border-black/40 dark:focus:border-white/40"
         />
         <datalist id="cpu-options">
           {CPU_OPTIONS.map((cpu) => (
@@ -73,7 +73,7 @@ export default function SpecsForm({
           value={specs.gpu}
           onChange={(e) => setSpecs({ ...specs, gpu: e.target.value })}
           placeholder="začni psát nebo vyber ze seznamu, např. NVIDIA RTX 3060"
-          className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2"
+          className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2 transition-colors focus:border-black/40 dark:focus:border-white/40"
         />
         <datalist id="gpu-options">
           {GPU_OPTIONS.map((gpu) => (
@@ -89,7 +89,7 @@ export default function SpecsForm({
             required
             value={specs.ramGB}
             onChange={(e) => setSpecs({ ...specs, ramGB: Number(e.target.value) })}
-            className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2"
+            className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2 transition-colors focus:border-black/40 dark:focus:border-white/40"
           >
             {RAM_OPTIONS_GB.map((gb) => (
               <option key={gb} value={gb}>
@@ -108,7 +108,7 @@ export default function SpecsForm({
             value={specs.storageFreeGB}
             onChange={(e) => setSpecs({ ...specs, storageFreeGB: Number(e.target.value) })}
             onFocus={(e) => e.target.select()}
-            className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2"
+            className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2 transition-colors focus:border-black/40 dark:focus:border-white/40"
           />
         </label>
       </div>
@@ -118,7 +118,7 @@ export default function SpecsForm({
         <select
           value={specs.os}
           onChange={(e) => setSpecs({ ...specs, os: e.target.value })}
-          className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2"
+          className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2 transition-colors focus:border-black/40 dark:focus:border-white/40"
         >
           {OS_OPTIONS.map((os) => (
             <option key={os} value={os}>
@@ -130,7 +130,7 @@ export default function SpecsForm({
 
       <button
         type="submit"
-        className="mt-2 rounded-lg bg-black px-4 py-2 font-medium text-white hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80"
+        className="mt-2 rounded-lg bg-black px-4 py-2 font-medium text-white transition-all hover:bg-black/80 active:scale-[0.98] dark:bg-white dark:text-black dark:hover:bg-white/80"
       >
         Uložit specs
       </button>

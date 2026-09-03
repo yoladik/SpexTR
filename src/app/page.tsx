@@ -37,10 +37,10 @@ export default function Home() {
           }}
         />
       ) : (
-        <div className="flex flex-col gap-2 rounded-xl border border-black/10 dark:border-white/15 p-6">
+        <div className="flex flex-col gap-2 rounded-xl border border-black/10 dark:border-white/15 p-6 animate-fade-in">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Tvoje PC specs</h2>
-            <button onClick={() => setEditing(true)} className="text-sm underline">
+            <button onClick={() => setEditing(true)} className="text-sm underline transition-opacity hover:opacity-70">
               Upravit
             </button>
           </div>

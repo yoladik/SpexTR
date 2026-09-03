@@ -53,14 +53,14 @@ export default function GameSearch({
         placeholder={placeholder}
         className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2"
       />
-      {loading && <p className="text-sm text-black/50 dark:text-white/50">Hledám...</p>}
+      {loading && <p className="text-sm text-black/50 dark:text-white/50 animate-pulse">Hledám...</p>}
       {results.length > 0 && (
-        <ul className="flex flex-col divide-y divide-black/10 dark:divide-white/15">
+        <ul className="flex flex-col divide-y divide-black/10 dark:divide-white/15 animate-fade-in">
           {results.map((r) => (
             <li key={r.appid}>
               <button
                 onClick={() => (onSelect ? onSelect(r) : router.push(`/game/${r.appid}`))}
-                className="flex w-full items-center gap-3 py-2 text-left hover:bg-black/5 dark:hover:bg-white/10"
+                className="flex w-full items-center gap-3 py-2 text-left transition-colors hover:bg-black/5 dark:hover:bg-white/10"
               >
                 {r.icon && (
                   // eslint-disable-next-line @next/next/no-img-element -- external Steam CDN image, domain varies per game

@@ -51,7 +51,8 @@ export default function GamePage({ params }: { params: Promise<{ appid: string }
     });
   }, [game, specs]);
 
-  if (loading) return <main className="mx-auto max-w-xl px-4 py-10">Načítám...</main>;
+  if (loading)
+    return <main className="mx-auto max-w-xl px-4 py-10 animate-pulse">Načítám...</main>;
 
   if (error) {
     return (
@@ -91,7 +92,7 @@ export default function GamePage({ params }: { params: Promise<{ appid: string }
       )}
       <h1 className="text-2xl font-bold">{game.name}</h1>
 
-      <div className="flex flex-col gap-3 rounded-xl border border-black/10 dark:border-white/15 p-6">
+      <div className="flex flex-col gap-3 rounded-xl border border-black/10 dark:border-white/15 p-6 animate-fade-in">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Celkové zhodnocení</h2>
           <VerdictBadge verdict={result.overall} />
@@ -102,8 +103,12 @@ export default function GamePage({ params }: { params: Promise<{ appid: string }
       </div>
 
       <div className="flex flex-col gap-4">
-        {result.components.map((c) => (
-          <div key={c.label} className="flex flex-col gap-3 rounded-xl border border-black/10 dark:border-white/15 p-4">
+        {result.components.map((c, i) => (
+          <div
+            key={c.label}
+            style={{ animationDelay: `${60 + i * 60}ms` }}
+            className="flex flex-col gap-3 rounded-xl border border-black/10 dark:border-white/15 p-4 animate-fade-in"
+          >
             <h3 className="text-center text-xl font-semibold">{c.label}</h3>
 
             <div className={`flex flex-col items-center gap-1 rounded-lg border p-3 text-center ${verdictBoxClassName(c.verdict)}`}>
