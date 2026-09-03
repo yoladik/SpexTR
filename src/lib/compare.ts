@@ -178,7 +178,7 @@ function estimateFps(overall: Verdict, specs: PcSpecs, game: GameRequirements): 
   if (overall === "borderline") {
     return {
       tier: "low",
-      text: "~30 FPS — splňuješ jen minimum.",
+      text: "30–60 FPS — splňuješ jen minimum.",
     };
   }
 
