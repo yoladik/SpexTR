@@ -122,6 +122,27 @@ function compareScored(
   };
 }
 
+// Storage is forgiving on purpose: unlike a weak CPU/GPU, you can just delete something or plug
+// in a bigger drive, so falling short of the minimum isn't the same kind of "fail". Within 20 GB
+// of the minimum still counts as borderline rather than an outright fail.
+const STORAGE_GRACE_GB = 20;
+
+function compareStorage(your: number, min?: number, rec?: number): ComponentComparison {
+  let verdict: Verdict = "unknown";
+  if (min !== undefined) {
+    const minVerdict: Verdict = your >= min ? "ok" : min - your <= STORAGE_GRACE_GB ? "borderline" : "fail";
+    const recVerdict: Verdict = rec !== undefined ? (your >= rec ? "ok" : "borderline") : minVerdict;
+    verdict = combine(minVerdict, recVerdict);
+  }
+  return {
+    label: "Volné místo na disku",
+    yourValue: `${your} GB`,
+    minValue: min !== undefined ? `${min} GB` : undefined,
+    recommendedValue: rec !== undefined ? `${rec} GB` : undefined,
+    verdict,
+  };
+}
+
 function compareOs(specs: PcSpecs, game: GameRequirements): ComponentComparison | null {
   if (!game.platforms) return null;
 
@@ -214,11 +235,14 @@ export function compareSpecs(specs: PcSpecs, game: GameRequirements): Comparison
   components.push(
     compareNumeric("Paměť (RAM)", specs.ramGB, game.minimum?.ramGB, game.recommended?.ramGB)
   );
-  components.push(
-    compareNumeric("Volné místo na disku", specs.storageFreeGB, game.minimum?.storageGB, game.recommended?.storageGB)
-  );
 
-  const known = components.filter((c) => c.verdict !== "unknown");
+  // Storage is shown as a card like everything else, but kept out of the core fail/borderline
+  // count below - it gets factored in afterward, capped so it can only pull "ok" down to
+  // "borderline", never all the way to "fail".
+  const storageComponent = compareStorage(specs.storageFreeGB, game.minimum?.storageGB, game.recommended?.storageGB);
+  components.push(storageComponent);
+
+  const known = components.filter((c) => c !== storageComponent && c.verdict !== "unknown");
   const failCount = known.filter((c) => c.verdict === "fail").length;
   const borderlineCount = known.filter((c) => c.verdict === "borderline").length;
 
@@ -242,6 +266,11 @@ export function compareSpecs(specs: PcSpecs, game: GameRequirements): Comparison
   } else {
     overall = "ok";
     overallText = "Splňuješ doporučené požadavky na všech rozpoznaných komponentách — hra by měla jet plynule na vyšší nastavení.";
+  }
+
+  if (overall === "ok" && (storageComponent.verdict === "fail" || storageComponent.verdict === "borderline")) {
+    overall = "borderline";
+    overallText = "Hardware v pohodě, ale chybí ti volné místo na disku — uvolni prostor a jinak by hra měla jet dobře.";
   }
 
   if (osComponent?.verdict === "fail") {
