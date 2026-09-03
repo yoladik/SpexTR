@@ -186,8 +186,10 @@ function estimateFps(overall: Verdict, specs: PcSpecs, game: GameRequirements): 
 export function compareSpecs(specs: PcSpecs, game: GameRequirements): ComparisonResult {
   const components: ComponentComparison[] = [];
 
+  // Not shown as its own card - you already picked your OS in your specs, and it's used to
+  // fetch the right platform's requirements in the first place. It only needs to surface when
+  // it actually blocks you: the game doesn't ship for your OS at all.
   const osComponent = compareOs(specs, game);
-  if (osComponent) components.push(osComponent);
 
   components.push(
     compareScored(
