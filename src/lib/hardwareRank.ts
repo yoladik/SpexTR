@@ -144,9 +144,14 @@ export function estimateGpuVramGB(name: string): number | null {
   return null;
 }
 
-export function scoreGpu(name: string): number | null {
-  const s = name.toUpperCase();
+// Laptop GPUs run at much lower power limits than their same-numbered desktop card and perform
+// meaningfully worse - a "laptop"/"mobile"/"Max-Q" RTX 4070 is closer to a desktop RTX 4060 than
+// a desktop 4070. Applied as a flat discount on top of whatever the desktop-oriented scoring
+// below computes, since Nvidia/AMD don't use a separate numbering scale for mobile parts.
+const LAPTOP_GPU_PATTERN = /\bLAPTOP\b|\bMOBILE\b|MAX-?Q/;
+const LAPTOP_GPU_DISCOUNT = 0.82;
 
+function scoreGpuDesktopScale(s: string): number | null {
   // Integrated graphics - low tier
   if (/(INTEL\s?)?(UHD|HD GRAPHICS|IRIS)/.test(s)) return 300;
   if (/VEGA\s?(3|6|8|11)\b(?!.*RX)/.test(s) && !/RX/.test(s)) return 600;
@@ -193,4 +198,11 @@ export function scoreGpu(name: string): number | null {
   if (/M[1234]\s?(PRO|MAX|ULTRA)?/.test(s)) return 1200;
 
   return null;
+}
+
+export function scoreGpu(name: string): number | null {
+  const s = name.toUpperCase();
+  const score = scoreGpuDesktopScale(s);
+  if (score === null) return null;
+  return LAPTOP_GPU_PATTERN.test(s) ? score * LAPTOP_GPU_DISCOUNT : score;
 }

@@ -152,6 +152,15 @@ export const GPU_OPTIONS = [
   "Apple M2 GPU",
   "Apple M3 GPU",
   "Apple M4 GPU",
+  // Notebookové (Laptop) varianty - výkonově slabší než stejně pojmenovaná desktopová karta
+  "NVIDIA RTX 3060 Laptop GPU",
+  "NVIDIA RTX 3070 Laptop GPU",
+  "NVIDIA RTX 3080 Laptop GPU",
+  "NVIDIA RTX 4050 Laptop GPU",
+  "NVIDIA RTX 4060 Laptop GPU",
+  "NVIDIA RTX 4070 Laptop GPU",
+  "NVIDIA RTX 4080 Laptop GPU",
+  "NVIDIA RTX 4090 Laptop GPU",
 ];
 
 export const RAM_OPTIONS_GB = [4, 6, 8, 12, 16, 24, 32, 48, 64, 128];

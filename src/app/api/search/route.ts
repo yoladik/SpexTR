@@ -5,6 +5,7 @@ interface SteamSearchItem {
   id: number;
   name: string;
   tiny_image?: string;
+  type?: string;
 }
 
 interface SearchResult {
@@ -13,10 +14,22 @@ interface SearchResult {
   icon?: string;
 }
 
+// Cheap in-memory cache, same tradeoffs as /api/game/[appid]'s: only lives for this server
+// instance, but cuts a lot of repeat Steam calls from someone typing/backspacing in the search
+// box, which otherwise hits Steam on every debounced keystroke with no caching at all.
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const cache = new Map<string, { expires: number; results: SearchResult[] }>();
+
 export async function GET(req: NextRequest) {
   const term = req.nextUrl.searchParams.get("term")?.trim();
   if (!term) {
     return NextResponse.json({ results: [] });
+  }
+
+  const cacheKey = term.toLowerCase();
+  const cached = cache.get(cacheKey);
+  if (cached && cached.expires > Date.now()) {
+    return NextResponse.json({ results: cached.results });
   }
 
   const steamResults = await searchSteam(term);
@@ -29,6 +42,8 @@ export async function GET(req: NextRequest) {
     (a, b) => matchScore(a.name, term) - matchScore(b.name, term)
   );
 
+  cache.set(cacheKey, { expires: Date.now() + CACHE_TTL_MS, results: combined });
+
   return NextResponse.json({ results: combined });
 }
 
@@ -39,11 +54,13 @@ async function searchSteam(term: string): Promise<SearchResult[]> {
     if (!res.ok) return [];
 
     const data = (await res.json()) as { total: number; items: SteamSearchItem[] };
-    return data.items.map((item) => ({
-      appid: String(item.id),
-      name: item.name,
-      icon: item.tiny_image,
-    }));
+    return data.items
+      .filter((item) => !item.type || item.type === "game") // drop DLC/soundtracks/bundles when Steam tells us the type
+      .map((item) => ({
+        appid: String(item.id),
+        name: item.name,
+        icon: item.tiny_image,
+      }));
   } catch {
     return [];
   }
