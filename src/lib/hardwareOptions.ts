@@ -157,3 +157,67 @@ export const GPU_OPTIONS = [
 export const RAM_OPTIONS_GB = [4, 6, 8, 12, 16, 24, 32, 48, 64, 128];
 
 export const OS_OPTIONS = ["Windows 10", "Windows 11", "macOS", "Linux (SteamOS/Proton)"];
+
+export interface PcPreset {
+  id: string;
+  label: string;
+  cpu: string;
+  gpu: string;
+  ramGB: number;
+}
+
+// Typical component pairings by tier, not real store SKUs - useful for someone who knows
+// roughly "what kind of PC" they have but not the exact model names. Everything here reuses the
+// exact strings from CPU_OPTIONS/GPU_OPTIONS/RAM_OPTIONS_GB so scoring picks them up the same as
+// a manual pick would.
+export const PC_PRESETS: PcPreset[] = [
+  {
+    id: "office",
+    label: "Kancelářské / lehké PC (integrovaná grafika)",
+    cpu: "Intel Core i3-12100",
+    gpu: "Intel UHD Graphics 630",
+    ramGB: 8,
+  },
+  {
+    id: "entry-gaming",
+    label: "Vstupní herní PC",
+    cpu: "AMD Ryzen 5 5600",
+    gpu: "NVIDIA GTX 1660 Super",
+    ramGB: 16,
+  },
+  {
+    id: "mid-gaming",
+    label: "Střední herní PC",
+    cpu: "AMD Ryzen 5 7600",
+    gpu: "NVIDIA RTX 4060",
+    ramGB: 16,
+  },
+  {
+    id: "high-gaming",
+    label: "Vyšší herní PC",
+    cpu: "AMD Ryzen 7 7700X",
+    gpu: "NVIDIA RTX 4070",
+    ramGB: 32,
+  },
+  {
+    id: "enthusiast",
+    label: "High-end herní PC",
+    cpu: "AMD Ryzen 9 7900X",
+    gpu: "NVIDIA RTX 4080 Super",
+    ramGB: 32,
+  },
+  {
+    id: "extreme",
+    label: "Extrémní / enthusiast PC",
+    cpu: "AMD Ryzen 9 7950X3D",
+    gpu: "NVIDIA RTX 4090",
+    ramGB: 32,
+  },
+  {
+    id: "macbook",
+    label: "MacBook (Apple Silicon)",
+    cpu: "Apple M2",
+    gpu: "Apple M2 GPU",
+    ramGB: 16,
+  },
+];

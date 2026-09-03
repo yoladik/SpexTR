@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { PcSpecs } from "@/lib/types";
 import { saveSpecs } from "@/lib/specsStorage";
-import { CPU_OPTIONS, GPU_OPTIONS, RAM_OPTIONS_GB, OS_OPTIONS } from "@/lib/hardwareOptions";
+import { CPU_OPTIONS, GPU_OPTIONS, RAM_OPTIONS_GB, OS_OPTIONS, PC_PRESETS } from "@/lib/hardwareOptions";
 
 const EMPTY: PcSpecs = { cpu: "", gpu: "", ramGB: 8, storageFreeGB: 50, os: "Windows 11" };
 
@@ -25,6 +25,28 @@ export default function SpecsForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 rounded-xl border border-black/10 dark:border-white/15 p-6">
       <h2 className="text-lg font-semibold">Tvoje PC specs</h2>
+
+      <label className="flex flex-col gap-1 text-sm">
+        Rychlá volba: hotové PC (volitelné)
+        <select
+          defaultValue=""
+          onChange={(e) => {
+            const preset = PC_PRESETS.find((p) => p.id === e.target.value);
+            if (preset) setSpecs({ ...specs, cpu: preset.cpu, gpu: preset.gpu, ramGB: preset.ramGB });
+          }}
+          className="rounded-lg border border-black/15 dark:border-white/20 px-3 py-2"
+        >
+          <option value="">-- vybrat ručně po komponentách níže --</option>
+          {PC_PRESETS.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.label}
+            </option>
+          ))}
+        </select>
+        <span className="text-xs text-black/40 dark:text-white/40">
+          Orientační sestavy podle typu PC, ne konkrétní modely z obchodu — pole níže si pak můžeš doladit.
+        </span>
+      </label>
 
       <label className="flex flex-col gap-1 text-sm">
         Procesor (CPU)
