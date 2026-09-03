@@ -104,7 +104,16 @@ export default function GamePage({ params }: { params: Promise<{ appid: string }
       <div className="flex flex-col gap-4">
         {result.components.map((c) => (
           <div key={c.label} className="flex flex-col gap-3 rounded-xl border border-black/10 dark:border-white/15 p-4">
-            <h3 className="font-medium">{c.label}</h3>
+            <h3 className="text-center text-xl font-semibold">{c.label}</h3>
+
+            <div className={`flex flex-col items-center gap-1 rounded-lg border p-3 text-center ${verdictBoxClassName(c.verdict)}`}>
+              <p className="text-lg font-semibold">{verdictLabel(c.verdict)}</p>
+              {splitAlternatives(c.yourValue).map((line, i) => (
+                <p key={i} className="text-sm opacity-70">
+                  {line}
+                </p>
+              ))}
+            </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1 rounded-lg border border-black/10 dark:border-white/15 p-3">
@@ -123,15 +132,6 @@ export default function GamePage({ params }: { params: Promise<{ appid: string }
                   </p>
                 ))}
               </div>
-            </div>
-
-            <div className={`flex flex-col gap-1 rounded-lg border p-3 ${verdictBoxClassName(c.verdict)}`}>
-              <p className="text-lg font-semibold">{verdictLabel(c.verdict)}</p>
-              {splitAlternatives(c.yourValue).map((line, i) => (
-                <p key={i} className="text-sm opacity-70">
-                  {line}
-                </p>
-              ))}
             </div>
 
             {c.note && <p className="text-xs text-black/40 dark:text-white/40">{c.note}</p>}
